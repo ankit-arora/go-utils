@@ -18,7 +18,6 @@ func (p *Pipeline) Add(d interface{}) {
 func (p *Pipeline) start() {
 	go func() {
 		var t *time.Timer
-		defer t.Stop()
 		var state []interface{}
 		forBreak := false
 		for !forBreak {
@@ -45,6 +44,7 @@ func (p *Pipeline) start() {
 				}
 				forBreak = true
 			}
+			t.Stop()
 		}
 		p.wait <- struct{}{}
 	}()

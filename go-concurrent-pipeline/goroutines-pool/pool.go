@@ -15,7 +15,7 @@ func (p *Pool) Submit(f func()) {
 	p.funcChannel <- f
 }
 
-func (p *Pool) Start() {
+func (p *Pool) start() {
 	go func() {
 		var done sync.WaitGroup
 		for f := range p.funcChannel {
@@ -38,13 +38,14 @@ func (p *Pool) Stop() {
 	<-p.stopped
 }
 
-func NewPool(maxSize int) (*Pool, error) {
-	if maxSize <= 0 {
-		return nil, errors.New("maxSize cannot be 0 or negative")
+func NewPool(maxConcurrency int) (*Pool, error) {
+	if maxConcurrency <= 0 {
+		return nil, errors.New("maxConcurrency cannot be 0 or negative")
 	}
 	p := &Pool{}
 	p.funcChannel = make(chan func())
 	p.stopped = make(chan struct{})
-	p.semaphore = make(chan struct{}, maxSize)
+	p.semaphore = make(chan struct{}, maxConcurrency)
+	p.start()
 	return p, nil
 }

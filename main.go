@@ -2,8 +2,9 @@ package main
 
 import (
 	"fmt"
-	"goroutines-pool/go-pipeline"
-	"goroutines-pool/goroutines-pool"
+	"goroutines-pool/go-concurrent-pipeline"
+	"goroutines-pool/go-concurrent-pipeline/go-pipeline"
+	"goroutines-pool/go-concurrent-pipeline/goroutines-pool"
 	"strconv"
 	"time"
 )
@@ -15,7 +16,6 @@ func main() {
 		fmt.Println(err)
 		return
 	}
-	p.Start()
 
 	for i := 0; i <= 10; i++ {
 		j := i
@@ -40,5 +40,19 @@ func main() {
 
 	pipeline.Shutdown()
 	//only pipeline example ends
+
+	cp, err := go_concurrent_pipeline.NewConcurrentPipeline(3, 20, 10*time.Second, func(i []interface{}) {
+		fmt.Println(i)
+	})
+
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	for i := 0; i < 1004; i++ {
+		cp.Add(2)
+	}
+	cp.Shutdown()
 
 }
