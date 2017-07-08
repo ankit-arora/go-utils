@@ -1,4 +1,4 @@
-Simple utility to implement a pool of goroutines to run independent tasks in parallel.
+Simple utilities in go.
 
 How to install: go get github.com/ankit-arora/go-utils
 
