@@ -38,13 +38,13 @@ func (p *Pool) Stop() {
 	<-p.stopped
 }
 
-func NewPool(size int) (*Pool, error) {
-	if size <= 0 {
-		return nil, errors.New("size cannot be 0 or negative")
+func NewPool(maxSize int) (*Pool, error) {
+	if maxSize <= 0 {
+		return nil, errors.New("maxSize cannot be 0 or negative")
 	}
 	p := &Pool{}
 	p.funcChannel = make(chan func())
 	p.stopped = make(chan struct{})
-	p.semaphore = make(chan struct{}, size)
+	p.semaphore = make(chan struct{}, maxSize)
 	return p, nil
 }
