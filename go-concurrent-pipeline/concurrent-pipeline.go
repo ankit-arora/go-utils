@@ -1,8 +1,8 @@
 package go_concurrent_pipeline
 
 import (
-	"goroutines-pool/go-concurrent-pipeline/go-pipeline"
-	"goroutines-pool/go-concurrent-pipeline/goroutines-pool"
+	"go-utils/go-concurrent-pipeline/go-pipeline"
+	"go-utils/go-concurrent-pipeline/goroutines-pool"
 	"time"
 )
 

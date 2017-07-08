@@ -2,9 +2,10 @@ package main
 
 import (
 	"fmt"
-	"goroutines-pool/go-concurrent-pipeline"
-	"goroutines-pool/go-concurrent-pipeline/go-pipeline"
-	"goroutines-pool/go-concurrent-pipeline/goroutines-pool"
+	"go-utils/go-concurrent-pipeline"
+	"go-utils/go-concurrent-pipeline/go-pipeline"
+	"go-utils/go-concurrent-pipeline/goroutines-pool"
+
 	"strconv"
 	"time"
 )
