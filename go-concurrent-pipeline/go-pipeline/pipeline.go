@@ -63,6 +63,7 @@ func (p *Pipeline) start() {
 func (p *Pipeline) Shutdown() {
 	close(p.shutdown)
 	<-p.wait
+	close(p.pipe)
 }
 
 func NewPipeline(pipeSize int, timeout time.Duration, f func(string, []interface{})) (*Pipeline, error) {
