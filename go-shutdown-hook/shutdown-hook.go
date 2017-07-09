@@ -1,7 +1,6 @@
 package go_shutdown_hook
 
 import (
-	"fmt"
 	"os"
 	"os/signal"
 	"syscall"
@@ -36,13 +35,11 @@ func executeHooks() {
 }
 
 func start() {
-	fmt.Println("starting hook")
 	go func() {
 		shutdown := false
 		for !shutdown {
 			select {
 			case <-shutdownSignals:
-				fmt.Println("shutting down")
 				executeHooks()
 				shutdown = true
 			case f := <-funcChannel:

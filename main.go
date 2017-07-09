@@ -61,7 +61,7 @@ func main() {
 	}()
 	pipeline.Add("2-pipeline", "bar-1")
 
-	time.Sleep(10 * time.Second)
+	//time.Sleep(10 * time.Second)
 
 	//only pipeline example ends
 
