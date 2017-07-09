@@ -23,7 +23,6 @@ func (p *Pipeline) Add(key string, i interface{}) {
 func (p *Pipeline) clear(stateMap map[string][]interface{}) {
 	for key, state := range stateMap {
 		if len(state) > 0 {
-			//fmt.Println("from timeout")
 			p.pipeLineTask(key, state)
 		}
 	}

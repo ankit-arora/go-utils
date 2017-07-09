@@ -6,6 +6,7 @@ import (
 	"go-utils/go-concurrent-pipeline/goroutines-pool"
 
 	"go-utils/go-concurrent-pipeline"
+	"go-utils/go-shutdown-hook"
 	"strconv"
 	"time"
 )
@@ -18,6 +19,12 @@ func main() {
 		return
 	}
 
+	go_shutdown_hook.ADD(func() {
+		fmt.Println("stopping pool p")
+		p.Stop()
+		fmt.Println("stopping pool p-done")
+	})
+
 	for i := 0; i <= 10; i++ {
 		j := i
 		p.Submit(func() {
@@ -25,13 +32,18 @@ func main() {
 		})
 	}
 
-	p.Stop()
 	//only pool example ends
 
 	//only pipeline example starts
 	pipeline, err := go_pipeline.NewPipeline(10, 2*time.Second, func(key string, data []interface{}) {
 		fmt.Print(key + " -> ")
 		fmt.Println(data)
+	})
+
+	go_shutdown_hook.ADD(func() {
+		fmt.Println("shutting down pipeline")
+		pipeline.Shutdown()
+		fmt.Println("shutting down pipeline-done")
 	})
 
 	for i := 0; i < 52; i++ {
@@ -42,14 +54,15 @@ func main() {
 	pipeline.Add("2-pipeline", "foo")
 	pipeline.Add("2-pipeline", "bar")
 
-	time.Sleep(4 * time.Second)
+	//time.Sleep(1 * time.Second)
 
-	pipeline.Add("2-pipeline", "foo-1")
+	go func() {
+		pipeline.Add("2-pipeline", "foo-1")
+	}()
 	pipeline.Add("2-pipeline", "bar-1")
 
-	time.Sleep(4 * time.Second)
+	time.Sleep(10 * time.Second)
 
-	pipeline.Shutdown()
 	//only pipeline example ends
 
 	//concurrent pipeline example starts
@@ -58,6 +71,12 @@ func main() {
 			fmt.Print(key + " -> ")
 			fmt.Println(i)
 		})
+
+	go_shutdown_hook.ADD(func() {
+		fmt.Println("shutting down concurrent_pipeline")
+		cp.Shutdown()
+		fmt.Println("shutting down concurrent_pipeline-done")
+	})
 
 	if err != nil {
 		fmt.Println(err)
@@ -78,6 +97,7 @@ func main() {
 		cp.Add("0", i)
 	}
 
-	cp.Shutdown()
-	//concurrent pipeline example ends
+	////concurrent pipeline example ends
+
+	go_shutdown_hook.Wait()
 }
