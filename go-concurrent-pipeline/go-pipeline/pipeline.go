@@ -33,8 +33,8 @@ func (p *Pipeline) start() {
 	go func() {
 		var t *time.Timer
 		stateMap := make(map[string][]interface{})
-		forBreak := false
-		for !forBreak {
+		shutdown := false
+		for !shutdown {
 			t = time.NewTimer(p.timeout)
 			select {
 			case d := <-p.pipe:
@@ -52,7 +52,7 @@ func (p *Pipeline) start() {
 			case <-p.shutdown:
 				p.clear(stateMap)
 				stateMap = make(map[string][]interface{})
-				forBreak = true
+				shutdown = true
 			}
 			t.Stop()
 		}

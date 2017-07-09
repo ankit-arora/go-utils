@@ -29,7 +29,7 @@ func main() {
 	//only pool example ends
 
 	//only pipeline example starts
-	pipeline, err := go_pipeline.NewPipeline(10, 10*time.Second, func(key string, data []interface{}) {
+	pipeline, err := go_pipeline.NewPipeline(10, 2*time.Second, func(key string, data []interface{}) {
 		fmt.Print(key + " -> ")
 		fmt.Println(data)
 	})
@@ -38,6 +38,16 @@ func main() {
 		pipeline.Add("0-pipeline", i)
 		pipeline.Add("1-pipeline", i*2)
 	}
+
+	pipeline.Add("2-pipeline", "foo")
+	pipeline.Add("2-pipeline", "bar")
+
+	time.Sleep(4 * time.Second)
+
+	pipeline.Add("2-pipeline", "foo-1")
+	pipeline.Add("2-pipeline", "bar-1")
+
+	time.Sleep(4 * time.Second)
 
 	pipeline.Shutdown()
 	//only pipeline example ends
