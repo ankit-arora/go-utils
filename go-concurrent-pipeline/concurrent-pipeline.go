@@ -16,11 +16,11 @@ func (cp *ConcurrentPipeline) Shutdown() {
 	cp.pool.Stop()
 }
 
-func (cp *ConcurrentPipeline) Add(d interface{}) {
-	cp.pipeline.Add(d)
+func (cp *ConcurrentPipeline) Add(key string, i interface{}) {
+	cp.pipeline.Add(key, i)
 }
 
-func NewConcurrentPipeline(maxConcurrency int, pipelineSize int, timeout time.Duration, f func([]interface{})) (*ConcurrentPipeline, error) {
+func NewConcurrentPipeline(maxConcurrency int, pipelineSize int, timeout time.Duration, f func(string, []interface{})) (*ConcurrentPipeline, error) {
 	cp := &ConcurrentPipeline{}
 	pool, err := goroutines_pool.NewPool(maxConcurrency)
 	if err != nil {
@@ -28,11 +28,11 @@ func NewConcurrentPipeline(maxConcurrency int, pipelineSize int, timeout time.Du
 	}
 	cp.pool = pool
 
-	cp.pipeline, err = go_pipeline.NewPipeline(pipelineSize, timeout, func(data []interface{}) {
-		temp := make([]interface{}, len(data))
-		copy(temp, data)
+	cp.pipeline, err = go_pipeline.NewPipeline(pipelineSize, timeout, func(key string, i []interface{}) {
+		temp := make([]interface{}, len(i))
+		copy(temp, i)
 		cp.pool.Submit(func() {
-			f(temp)
+			f(key, temp)
 		})
 	})
 

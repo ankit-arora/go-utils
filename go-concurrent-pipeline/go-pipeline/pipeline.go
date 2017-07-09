@@ -2,46 +2,56 @@ package go_pipeline
 
 import "time"
 
+type data struct {
+	key string
+	i   interface{}
+}
+
 type Pipeline struct {
-	pipe         chan interface{}
+	pipe         chan data
 	pipeSize     int
 	timeout      time.Duration
-	pipeLineTask func([]interface{})
+	pipeLineTask func(string, []interface{})
 	shutdown     chan struct{}
 	wait         chan struct{}
 }
 
-func (p *Pipeline) Add(d interface{}) {
-	p.pipe <- d
+func (p *Pipeline) Add(key string, i interface{}) {
+	p.pipe <- data{key, i}
+}
+
+func (p *Pipeline) clear(stateMap map[string][]interface{}) {
+	for key, state := range stateMap {
+		if len(state) > 0 {
+			//fmt.Println("from timeout")
+			p.pipeLineTask(key, state)
+		}
+	}
 }
 
 func (p *Pipeline) start() {
 	go func() {
 		var t *time.Timer
-		var state []interface{}
+		stateMap := make(map[string][]interface{})
 		forBreak := false
 		for !forBreak {
 			t = time.NewTimer(p.timeout)
 			select {
 			case d := <-p.pipe:
-				state = append(state, d)
-				if len(state) == p.pipeSize {
+				key := d.key
+				i := d.i
+				stateMap[key] = append(stateMap[key], i)
+				if len(stateMap[key]) == p.pipeSize {
 					//fmt.Println("from data")
-					p.pipeLineTask(state)
-					state = nil
+					p.pipeLineTask(key, stateMap[key])
+					stateMap[key] = nil
 				}
 			case <-t.C:
-				if len(state) > 0 {
-					//fmt.Println("from timeout")
-					p.pipeLineTask(state)
-					state = nil
-				}
+				p.clear(stateMap)
+				stateMap = make(map[string][]interface{})
 			case <-p.shutdown:
-				if len(state) > 0 {
-					//fmt.Println("from shutdown")
-					p.pipeLineTask(state)
-					state = nil
-				}
+				p.clear(stateMap)
+				stateMap = make(map[string][]interface{})
 				forBreak = true
 			}
 			t.Stop()
@@ -55,12 +65,12 @@ func (p *Pipeline) Shutdown() {
 	<-p.wait
 }
 
-func NewPipeline(pipeSize int, timeout time.Duration, f func([]interface{})) (*Pipeline, error) {
+func NewPipeline(pipeSize int, timeout time.Duration, f func(string, []interface{})) (*Pipeline, error) {
 	p := &Pipeline{}
 	p.pipeSize = pipeSize
 	p.timeout = timeout
 	p.pipeLineTask = f
-	p.pipe = make(chan interface{})
+	p.pipe = make(chan data)
 	p.shutdown = make(chan struct{})
 	p.wait = make(chan struct{})
 	p.start()
