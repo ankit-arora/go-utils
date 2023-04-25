@@ -2,11 +2,10 @@ package main
 
 import (
 	"fmt"
-	"go-utils/go-concurrent-pipeline/go-pipeline"
-	"go-utils/go-concurrent-pipeline/goroutines-pool"
-
-	"go-utils/go-concurrent-pipeline"
-	"go-utils/go-shutdown-hook"
+	go_concurrent_pipeline "github.com/ankit-arora/go-utils/go-concurrent-pipeline"
+	go_pipeline "github.com/ankit-arora/go-utils/go-concurrent-pipeline/go-pipeline"
+	goroutines_pool "github.com/ankit-arora/go-utils/go-concurrent-pipeline/goroutines-pool"
+	go_shutdown_hook "github.com/ankit-arora/go-utils/go-shutdown-hook"
 	"strconv"
 	"time"
 )
