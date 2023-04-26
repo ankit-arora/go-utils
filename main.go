@@ -20,7 +20,7 @@ func main() {
 
 	go_shutdown_hook.ADD(func() {
 		fmt.Println("stopping pool p")
-		p.Stop()
+		p.Shutdown()
 		fmt.Println("stopping pool p-done")
 	})
 
@@ -66,9 +66,8 @@ func main() {
 
 	//concurrent pipeline example starts
 	cp, err := go_concurrent_pipeline.NewConcurrentPipeline(10, 10, 3*time.Second,
-		func(key string, i []interface{}) {
-			fmt.Print(key + " -> ")
-			fmt.Println(i)
+		func(key string, i []string) {
+			fmt.Printf("%s->%s\n", key, i)
 		})
 
 	go_shutdown_hook.ADD(func() {
@@ -83,17 +82,17 @@ func main() {
 	}
 
 	for i := 0; i < 51; i++ {
-		cp.Add("0", i)
+		cp.Add("0", fmt.Sprintf("%d", i))
 	}
 
-	//time.Sleep(10 * time.Second)
+	time.Sleep(10 * time.Second)
 
 	for i := 51; i < 101; i++ {
-		cp.Add("1", i)
+		cp.Add("1", fmt.Sprintf("%d", i))
 	}
 
 	for i := 101; i < 151; i++ {
-		cp.Add("0", i)
+		cp.Add("0", fmt.Sprintf("%d", i))
 	}
 
 	////concurrent pipeline example ends

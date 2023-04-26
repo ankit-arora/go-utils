@@ -6,30 +6,30 @@ import (
 	"time"
 )
 
-type ConcurrentPipeline struct {
-	pipeline *go_pipeline.Pipeline
+type ConcurrentPipeline[T any] struct {
+	pipeline *go_pipeline.Pipeline[T]
 	pool     *goroutines_pool.Pool
 }
 
-func (cp *ConcurrentPipeline) Shutdown() {
+func (cp *ConcurrentPipeline[T]) Shutdown() {
 	cp.pipeline.Shutdown()
-	cp.pool.Stop()
+	cp.pool.Shutdown()
 }
 
-func (cp *ConcurrentPipeline) Add(key string, i interface{}) {
+func (cp *ConcurrentPipeline[T]) Add(key string, i T) {
 	cp.pipeline.Add(key, i)
 }
 
-func NewConcurrentPipeline(maxConcurrency int, pipelineSize int, timeout time.Duration, f func(string, []interface{})) (*ConcurrentPipeline, error) {
-	cp := &ConcurrentPipeline{}
+func NewConcurrentPipeline[T any](maxConcurrency int, pipelineSize int, timeout time.Duration, f func(string, []T)) (*ConcurrentPipeline[T], error) {
+	cp := &ConcurrentPipeline[T]{}
 	pool, err := goroutines_pool.NewPool(maxConcurrency)
 	if err != nil {
 		return nil, err
 	}
 	cp.pool = pool
 
-	cp.pipeline, err = go_pipeline.NewPipeline(pipelineSize, timeout, func(key string, i []interface{}) {
-		temp := make([]interface{}, len(i))
+	cp.pipeline, err = go_pipeline.NewPipeline(pipelineSize, timeout, func(key string, i []T) {
+		temp := make([]T, len(i))
 		copy(temp, i)
 		cp.pool.Submit(func() {
 			f(key, temp)

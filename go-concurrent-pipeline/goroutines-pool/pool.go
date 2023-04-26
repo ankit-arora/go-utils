@@ -33,7 +33,7 @@ func (p *Pool) start() {
 	}()
 }
 
-func (p *Pool) Stop() {
+func (p *Pool) Shutdown() {
 	close(p.funcChannel)
 	<-p.stopped
 }
