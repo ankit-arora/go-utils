@@ -16,8 +16,14 @@ type Pipeline[K comparable, T any] struct {
 	wait         chan struct{}
 }
 
-func (p *Pipeline[K, T]) Add(key K, i T) {
-	p.pipe <- data[K, T]{key, i}
+func (p *Pipeline[K, T]) Add(key K, i T) bool {
+	select {
+	case <-p.shutdown:
+		return false
+	default:
+		p.pipe <- data[K, T]{key, i}
+	}
+	return true
 }
 
 func (p *Pipeline[K, T]) clear(stateMap map[K][]T) {
@@ -33,9 +39,19 @@ func (p *Pipeline[K, T]) start() {
 		var t *time.Timer
 		stateMap := make(map[K][]T)
 		shutdown := false
+		t = time.NewTimer(p.timeout)
 		for !shutdown {
-			t = time.NewTimer(p.timeout)
 			select {
+			case <-p.shutdown:
+				p.clear(stateMap)
+				stateMap = make(map[K][]T)
+				shutdown = true
+				t.Stop()
+			case <-t.C:
+				p.clear(stateMap)
+				stateMap = make(map[K][]T)
+				t.Stop()
+				t.Reset(p.timeout)
 			case d := <-p.pipe:
 				key := d.key
 				i := d.i
@@ -45,15 +61,7 @@ func (p *Pipeline[K, T]) start() {
 					p.pipeLineTask(key, stateMap[key])
 					stateMap[key] = nil
 				}
-			case <-t.C:
-				p.clear(stateMap)
-				stateMap = make(map[K][]T)
-			case <-p.shutdown:
-				p.clear(stateMap)
-				stateMap = make(map[K][]T)
-				shutdown = true
 			}
-			t.Stop()
 		}
 		p.wait <- struct{}{}
 	}()

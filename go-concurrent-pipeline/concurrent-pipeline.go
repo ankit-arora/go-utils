@@ -16,8 +16,8 @@ func (cp *ConcurrentPipeline[K, T]) Shutdown() {
 	cp.pool.Shutdown()
 }
 
-func (cp *ConcurrentPipeline[K, T]) Add(key K, i T) {
-	cp.pipeline.Add(key, i)
+func (cp *ConcurrentPipeline[K, T]) Add(key K, i T) bool {
+	return cp.pipeline.Add(key, i)
 }
 
 func NewConcurrentPipeline[K comparable, T any](maxConcurrency int, pipelineSize int, timeout time.Duration, f func(K, []T)) (*ConcurrentPipeline[K, T], error) {
